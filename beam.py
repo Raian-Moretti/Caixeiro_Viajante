@@ -116,6 +116,5 @@ cities = {
 }
 
 best_path = local_beam_search(cities, 5, 100)
-# best_path = tsp_genetic(cities)
 plot_cities_and_path(cities, best_path)
 print("Best path found:", best_path)
