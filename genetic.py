@@ -4,16 +4,36 @@ import matplotlib.pyplot as plt
 
 # Define the cities
 cities = {
-    'Lisbon': (38.736946, -9.142685),
-    'Madrid': (40.416775, -3.703790),
-    'Paris': (48.856614, 2.352222),
-    'Berlin': (52.520008, 13.404954),
-    'Rome': (41.902782, 12.496366),
-    'Warsaw': (52.229676, 21.012229),
-    'Athens': (37.983810, 23.727539),
-    'Ankara': (39.933365, 32.859741),
-    'Moscow': (55.755825, 37.617298),
-    'London': (51.507351, -0.127758)
+    "Abu Dhabi": (24.4539, 54.3773),
+    "Amsterdam": (52.3667, 4.8945),
+    "Athens": (37.9838, 23.7275),
+    "Beijing": (39.9042, 116.4074),
+    "Berlin": (52.5200, 13.4050),
+    "Brasília": (-15.8267, -47.9218),
+    "Cairo": (30.0444, 31.2357),
+    "Canberra": (-35.2820, 149.1287),
+    "Havana": (23.1136, -82.3666),
+    "Islamabad": (33.6844, 73.0479),
+    "Jakarta": (-6.1751, 106.8650),
+    "Kiev": (50.4501, 30.5234),
+    "Lisbon": (38.7223, -9.1393),
+    "London": (51.5074, -0.1278),
+    "Madrid": (40.4168, -3.7038),
+    "Mexico City": (19.4326, -99.1332),
+    "Moscow": (55.7558, 37.6173),
+    "Nairobi": (-1.2921, 36.8219),
+    "New Delhi": (28.6139, 77.2090),
+    "Oslo": (59.9139, 10.7522),
+    "Ottawa": (45.4215, -75.6972),
+    "Paris": (48.8566, 2.3522),
+    "Rome": (41.9028, 12.4964),
+    "Seoul": (37.5665, 126.9780),
+    "Stockholm": (59.3293, 18.0686),
+    "Tokyo": (35.6762, 139.6503),
+    "Vienna": (48.2082, 16.3738),
+    "Washington, D.C.": (38.9072, -77.0369),
+    "Wellington": (-41.2865, 174.7762),
+    "Bangkok": (13.7563, 100.5018),
 }
 
 # Define the distance between two cities using the Haversine formula
@@ -66,23 +86,26 @@ def selection(population):
     return parents
 
 # Define the crossover function
-def crossover(parents):
+def crossover(parents, crossover_probability):
     offspring = []
     for parent1, parent2 in parents:
-        point1 = random.randint(0, len(parent1)-1)
-        point2 = random.randint(0, len(parent1)-1)
-        if point1 > point2:
-            point1, point2 = point2, point1
-        child = [None]*len(parent1)
-        for i in range(point1, point2+1):
-            child[i] = parent1[i]
-            j = 0
-        for i in range(len(parent2)):
-            if not parent2[i] in child:
-                while child[j] != None:
-                    j += 1
-                child[j] = parent2[i]
-        offspring.append(child)
+        if random.random() < crossover_probability:
+            point1 = random.randint(0, len(parent1)-1)
+            point2 = random.randint(0, len(parent1)-1)
+            if point1 > point2:
+                point1, point2 = point2, point1
+            child = [None]*len(parent1)
+            for i in range(point1, point2+1):
+                child[i] = parent1[i]
+                j = 0
+            for i in range(len(parent2)):
+                if not parent2[i] in child:
+                    while child[j] != None:
+                        j += 1
+                    child[j] = parent2[i]
+            offspring.append(child)
+        else:
+            offspring.append(parent1)
     return offspring
 
 # Define the mutation function
@@ -106,7 +129,7 @@ def genetic_algorithm(num_cities, population_size, num_generations, crossover_pr
         # Select the parents
         parents = selection(population)
         # Crossover the parents to create the offspring
-        offspring = crossover(parents)
+        offspring = crossover(parents, crossover_probability)
         # Mutate the offspring
         population = [mutate(individual, mutation_probability) for individual in offspring]
         # Evaluate the fitness of the new population
@@ -139,10 +162,11 @@ def genetic_algorithm(num_cities, population_size, num_generations, crossover_pr
         distance = calculate_distance(cities[city1], cities[city2])
         total_distance += distance
         plt.text((x1+x2)/2, (y1+y2)/2, "{:.2f}".format(distance), fontsize=6)
-    plt.title("Optimal Route for {} Cities\nTotal Distance: {:.2f}".format(num_cities, total_distance))
+    plt.title("Optimal Route for {} Cities\nTotal Distance: {:.2f} km".format(num_cities, total_distance))
     plt.xlabel("Longitude")
     plt.ylabel("Latitude")
     plt.show()
 
-# Run the genetic algorithm with 10 cities
-genetic_algorithm(10, 50, 100, 0.8, 0.1)
+# Run the genetic algorithm with num_cities cities
+num_cities = 30
+genetic_algorithm(num_cities, 1000, 300, 0.8, 0.1)

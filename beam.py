@@ -1,111 +1,89 @@
-import itertools
-import random
-import math
 import matplotlib.pyplot as plt
+import numpy as np
+from itertools import permutations
 
-
-
-
-
-def plot_cities_and_path(cities, path):
-    fig, ax = plt.subplots()
-    x_vals = [coord[0] for coord in cities.values()]
-    y_vals = [coord[1] for coord in cities.values()]
-    ax.scatter(x_vals, y_vals, color='blue')
-    total_distance = 0
-    for i in range(len(path)-1):
-        city1 = path[i]
-        city2 = path[i+1]
-        x1, y1 = cities[city1]
-        x2, y2 = cities[city2]
-        dist = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-        total_distance += dist
-        ax.plot([x1, x2], [y1, y2], color='red')
-        ax.annotate(str(round(dist, 2)), ((x1+x2)/2, (y1+y2)/2), color='green')
-    city1 = path[-1]
-    city2 = path[0]
-    x1, y1 = cities[city1]
-    x2, y2 = cities[city2]
-    dist = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-    total_distance += dist
-    ax.plot([x1, x2], [y1, y2], color='red')
-    ax.annotate(str(round(dist, 2)), ((x1+x2)/2, (y1+y2)/2), color='green')
-    plt.title('Total Distance: {}'.format(round(total_distance, 2)))
-    plt.show()
-
-def distance(city1, city2):
-    R = 6371  # radius of the Earth in km
-    lat1, lon1 = cities[city1]
-    lat2, lon2 = cities[city2]
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
-    a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * \
-        math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    return R * c
-
-def all_permutations(cities):
-    return list(itertools.permutations(cities))
-
-
-def generate_random_beam(cities, beam_width):
-    return [list(perm) for perm in random.sample(all_permutations(cities), beam_width)]
-
-def evaluate_fitness(paths):
-    fitness_scores = []
-    for path in paths:
-        total_distance = 0
-        for i in range(len(path)-1):
-            total_distance += distance(path[i], path[i+1])
-        total_distance += distance(path[-1], path[0])
-        fitness_scores.append(1/total_distance)
-    return fitness_scores
-
-def select_best_paths(paths, fitness_scores, num_best):
-    path_fitness_pairs = list(zip(paths, fitness_scores))
-    sorted_pairs = sorted(path_fitness_pairs, key=lambda x: x[1], reverse=True)
-    return [pair[0] for pair in sorted_pairs[:num_best]]
-
-def generate_children(parents, beam_width):
-    children = []
-    for i in range(beam_width):
-        random.shuffle(parents)
-        child = list(parents[0])
-        for j in range(1, len(parents)):
-            for k in range(len(child)):
-                if parents[j][k] not in child:
-                    child[k] = parents[j][k]
-                    break
-        children.append(child)
-    return children
-
-def local_beam_search(cities, beam_width, iterations):
-    beam = generate_random_beam(cities, beam_width)
-    for i in range(iterations):
-        fitness_scores = evaluate_fitness(beam)
-        best_paths = select_best_paths(beam, fitness_scores, beam_width)
-        if len(set([tuple(path) for path in best_paths])) == 1:
-            # all best paths are the same, terminate early
-            return best_paths[0]
-        beam = generate_children(best_paths, beam_width)
-    fitness_scores = evaluate_fitness(beam)
-    best_path = select_best_paths(beam, fitness_scores, 1)[0]
-    return best_path
-
-# example usage
 cities = {
-    'Lisbon': (38.736946, -9.142685),
-    'Madrid': (40.416775, -3.703790),
-    'Paris': (48.856614, 2.352222),
-    'Berlin': (52.520008, 13.404954),
-    'Rome': (41.902782, 12.496366),
-    'Warsaw': (52.229676, 21.012229),
-    'Athens': (37.983810, 23.727539),
-    'Ankara': (39.933365, 32.859741),
-    'Moscow': (55.755825, 37.617298),
-    'London': (51.507351, -0.127758)
+    "Abu Dhabi": (24.4539, 54.3773),
+    "Amsterdam": (52.3667, 4.8945),
+    "Athens": (37.9838, 23.7275),
+    "Beijing": (39.9042, 116.4074),
+    "Berlin": (52.5200, 13.4050),
+    "Brasília": (-15.8267, -47.9218),
+    "Cairo": (30.0444, 31.2357),
+    "Canberra": (-35.2820, 149.1287),
+    "Havana": (23.1136, -82.3666),
+    "Islamabad": (33.6844, 73.0479),
+    "Jakarta": (-6.1751, 106.8650),
+    "Kiev": (50.4501, 30.5234),
+    "Lisbon": (38.7223, -9.1393),
+    "London": (51.5074, -0.1278),
+    "Madrid": (40.4168, -3.7038),
+    "Mexico City": (19.4326, -99.1332),
+    "Moscow": (55.7558, 37.6173),
+    "Nairobi": (-1.2921, 36.8219),
+    "New Delhi": (28.6139, 77.2090),
+    "Oslo": (59.9139, 10.7522),
+    "Ottawa": (45.4215, -75.6972),
+    "Paris": (48.8566, 2.3522),
+    "Rome": (41.9028, 12.4964),
+    "Seoul": (37.5665, 126.9780),
+    "Stockholm": (59.3293, 18.0686),
+    "Tokyo": (35.6762, 139.6503),
+    "Vienna": (48.2082, 16.3738),
+    "Washington, D.C.": (38.9072, -77.0369),
+    "Wellington": (-41.2865, 174.7762),
+    "Bangkok": (13.7563, 100.5018),
 }
 
-best_path = local_beam_search(cities, 5, 100)
-plot_cities_and_path(cities, best_path)
-print("Best path found:", best_path)
+def get_distance(city1, city2):
+    lat1, lon1 = city1
+    lat2, lon2 = city2
+    R = 6371 # Earth radius in kilometers
+
+    dLat = np.deg2rad(lat2 - lat1)
+    dLon = np.deg2rad(lon2 - lon1)
+    lat1 = np.deg2rad(lat1)
+    lat2 = np.deg2rad(lat2)
+
+    a = np.sin(dLat/2)**2 + np.cos(lat1)*np.cos(lat2)*np.sin(dLon/2)**2
+    c = 2*np.arctan2(np.sqrt(a), np.sqrt(1-a))
+
+    distance = R*c
+    return distance
+
+def plot_cities(cities, path):
+    x = [city[1] for city in cities.values()]
+    y = [city[0] for city in cities.values()]
+
+    fig, ax = plt.subplots()
+    ax.scatter(x, y, color="red")
+
+    for i in range(len(path)):
+        start = path[i]
+        end = path[(i+1)%len(path)]
+        distance = get_distance(cities[start], cities[end])
+        ax.plot([cities[start][1], cities[end][1]], [cities[start][0], cities[end][0]], color="red")
+        ax.text(np.mean([cities[start][1], cities[end][1]]), np.mean([cities[start][0], cities[end][0]]), round(distance, 2), fontsize=8)
+
+    total_distance = sum([get_distance(cities[path[i]], cities[path[(i+1)%len(path)]]) for i in range(len(path))])
+    ax.set_title(f"Path Distance: {round(total_distance, 2)} km")
+    plt.show()
+
+def beam_search(cities, beam_width):
+    cities_list = list(cities.keys())
+    paths = [[city] for city in cities_list]
+    for i in range(len(cities)-1):
+        new_paths = []
+        for path in paths:
+            last_city = path[-1]
+            rest_cities = set(cities_list) - set(path)
+            for city in rest_cities:
+                new_path = path + [city]
+                new_paths.append(new_path)
+        sorted_paths = sorted(new_paths, key=lambda x: sum([get_distance(cities[x[i]], cities[x[(i+1)%len(x)]]) for i in range(len(x))]))[:beam_width]
+        paths = sorted_paths
+    best_path = paths[0]
+    return best_path
+
+best_path = beam_search(cities, 100)
+plot_cities(cities, best_path)
