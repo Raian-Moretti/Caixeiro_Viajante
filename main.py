@@ -4,4 +4,4 @@ from menu import Menu
 app = QApplication([])
 menu = Menu()
 menu.show()
-app.exec_()
+app.exec()
