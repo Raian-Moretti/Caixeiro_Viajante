@@ -1,10 +1,7 @@
 from PySide6.QtWidgets import QApplication
-from menu import Menu
-from genetic import Genetic
+from genetic import genetic_algorithm
+from beam import beam_search
 
-for i in range(10):
-    Genetic.genetic_algorithm()
-# app = QApplication([])
-# menu = Menu()
-# menu.show()
-# app.exec()
+for i in range(5):
+    genetic_algorithm()
+    beam_search()

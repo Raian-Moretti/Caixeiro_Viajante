@@ -1,189 +1,142 @@
-import math
 import random
-import matplotlib.pyplot as plt
+import math
+from plot import plot
+from cities import Cities
 
-# Menu class for Genetic Algorithm
-class Genetic:
-    cities = {
-        "Abu Dhabi": (24.4539, 54.3773),
-        "Amsterdam": (52.3667, 4.8945),
-        "Athens": (37.9838, 23.7275),
-        "Beijing": (39.9042, 116.4074),
-        "Berlin": (52.5200, 13.4050),
-        "Brasília": (-15.8267, -47.9218),
-        "Cairo": (30.0444, 31.2357),
-        "Canberra": (-35.2820, 149.1287),
-        "Havana": (23.1136, -82.3666),
+population_size = 50
+generations = 200
+mutation_rate = 0.05
+crossover_rate = 0.8
 
+def mutation(population):
 
-    }
+    # for i in range(len(population)):
+    #     if(random.random() < Cities.mutation_rate):
 
-    population_size = 500
-    generations = 200
-    mutation_rate = 0.20
-    crossover_rate = 0.8
+    #         first_mutation = math.ceil(random.random()*(len(Cities.cities)-1))
+    #         second_mutation = math.ceil(random.random()*(len(Cities.cities)-1))
+    #         population[i][first_mutation], population[i][second_mutation] = population[i][second_mutation], population[i][first_mutation]
+    # return population
 
-    def mutation(population):
-        # print(population)
-
-        # num_mutations = 2
-        first_mutation = math.ceil(random.random()*(len(Genetic.cities)-1))
-        second_mutation = math.ceil(random.random()*(len(Genetic.cities)-1))
-        # print(population)
-        # print(first_mutation,second_mutation)
-        # print(population)
-        # first_mutation, second_mutation = random.sample(len(Genetic.cities),num_mutations)
-
-        population[first_mutation], population[second_mutation] = population[second_mutation], population[first_mutation]
-
-        return population
-        
-
-    def crossover(parents):
-        new_population = []
-        for first_parent, second_parent in parents:
-
-            if random.random() < Genetic.crossover_rate:
-                child = []
-                for i in range(int((len(first_parent))/2)):
-                    child.append(first_parent[i+1])
-                for i in range(len(second_parent)):
-                    if not(second_parent[i] in child):
-                        child.append(second_parent[i])
-                new_population.append(child)
+    new_population = []
+    for i in range(len(population)):
+        if(random.random() < mutation_rate):
+            new_individual = []
+            rand1 = math.ceil(random.random()*(len(Cities.cities)-1))
+            rand2 = math.ceil(random.random()*(len(Cities.cities)-1))
+            begin, end = 0, 0
+            if(rand1 < rand2):
+                begin = rand1
+                end = rand2
             else:
-
-                if(Genetic.fitness(first_parent) > Genetic.fitness(second_parent)):
-                    new_population.append(first_parent)
-                else:
-                    new_population.append(second_parent)
-        
-        return new_population
-
-
-    def selection(individuals):
-        total_fitness = 0
-        for i in range(len(individuals)):
-            fitness = Genetic.fitness(individuals[i])
-            total_fitness += fitness
-        
-        probabilities = []
-        for i in range(len(individuals)):
-            fitness = Genetic.fitness(individuals[i])
-            probabilities.append(fitness/total_fitness)
-
-        parents = []
-        while len(parents) != len(individuals):
-            first_parent = random.choices(individuals, probabilities)[0]
-            second_parent = random.choices(individuals, probabilities)[0]
+                begin = rand2
+                end = rand1
             
-            if(first_parent != second_parent):
-                parents.append((first_parent,second_parent))
+            new_individual[:begin] = population[i][:begin]
+            new_individual[begin:end] = reversed(population[i][begin:end])
+            new_individual[end:] = population[i][end:]
+            new_population.append(new_individual)
+        else:
+            new_population.append(population[i])
 
-        return parents        
+    return new_population
 
-    # Sorteia os indivíduos da população aleatoriamente
-    def population(population_size, cities):
-        individuals = []
 
-        for i in range(population_size):
-            individual = list(cities.keys())
-            random.shuffle(individual)
-            individuals.append(individual)
+def crossover(parents):
+    new_population = []
+    for first_parent, second_parent in parents:
+
+        if random.random() < crossover_rate:
+            child = []
+            for i in range(int((len(first_parent))/2)):
+                child.append(first_parent[i+1])
+            for i in range(len(second_parent)):
+                if not(second_parent[i] in child):
+                    child.append(second_parent[i])
+            new_population.append(child)
+        else:
+
+            if(fitness(first_parent) > fitness(second_parent)):
+                new_population.append(first_parent)
+            else:
+                new_population.append(second_parent)
+    
+    return new_population
+
+
+def selection(individuals):
+    total_fitness = 0
+    for i in range(len(individuals)):
+        var_fitness = fitness(individuals[i])
+        total_fitness += var_fitness
+    
+    probabilities = []
+    for i in range(len(individuals)):
+        var_fitness = fitness(individuals[i])
+        probabilities.append(var_fitness/total_fitness)
+
+    parents = []
+    while len(parents) != len(individuals):
+        first_parent = random.choices(individuals, probabilities)[0]
+        second_parent = random.choices(individuals, probabilities)[0]
         
-        return individuals
+        if(first_parent != second_parent):
+            parents.append((first_parent,second_parent))
 
-    def fitness(route):
-        # A distância total da rota é o parâmetro responsável por definir o indivíduo com melhor fitness
-        total_distance = 0
-        for i in range(1, len(route)):
-            total_distance+= Genetic.calculate_distance(route[i], route[i-1])
-        total_distance+= Genetic.calculate_distance(route[len(route)-1], route[0])
+    return parents        
 
-        fitness = 1 / total_distance
-        return fitness
+# Sorteia os indivíduos da população aleatoriamente
+def population(population_size, cities):
+    individuals = []
+
+    for i in range(population_size):
+        individual = list(cities.keys())
+        random.shuffle(individual)
+        individuals.append(individual)
     
-    # Distância entre dois pontos em uma esfera a partir de lat e lon
-    def calculate_distance(city1, city2):
+    return individuals
 
-        lat1, lon1 = Genetic.cities[city1]
-        lat2, lon2 = Genetic.cities[city2]
-        radius = 6371 # km
+def fitness(route):
+    # A distância total da rota é o parâmetro responsável por definir o indivíduo com melhor fitness
+    total_distance = 0
+    for i in range(1, len(route)):
+        total_distance+= Cities.calculate_distance(route[i], route[i-1])
+    total_distance+= Cities.calculate_distance(route[len(route)-1], route[0])
 
-        dlat = math.radians(lat2-lat1)
-        dlon = math.radians(lon2-lon1)
-        a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-            * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-        d = radius * c
+    fitness = 1 / total_distance
+    return fitness
 
-        return d
-    
-    def genetic_algorithm():
+def genetic_algorithm():
 
-        individuals = Genetic.population(Genetic.population_size, Genetic.cities)
-        best_route = []
-        best_fitness = 0
-        for i in range(Genetic.generations):
-            parents = Genetic.selection(individuals)
+    individuals = population(population_size, Cities.cities)
+    best_route = []
+    best_fitness = 0
+    best_generation = 0
+    for i in range(generations):
+        print("GENERATION: ", i)
 
-            new_population = Genetic.crossover(parents)
-            
-            for j in range(len(new_population)):
-                new_population[j] = Genetic.mutation(new_population[j])
+        parents = selection(individuals)
 
-            individuals = new_population
+        new_population = crossover(parents)
+        
+        new_population = mutation(new_population)
 
-            for j in range(len(individuals)):
-                if(j == 0):
-                    best_fitness = Genetic.fitness(individuals[j])
-                    best_route = individuals[j]
+        individuals = new_population
 
-                else:
-                    if(best_fitness < Genetic.fitness(individuals[j])):
-                        best_fitness = Genetic.fitness(individuals[j])
+        for j in range(len(individuals)):
+            if(i == 0):
+                best_fitness = fitness(individuals[j])
+                best_route = individuals[j]
+
+            else:
+                if(best_fitness < fitness(individuals[j])):
+                    best_fitness = fitness(individuals[j])
+                    if(fitness(best_route) < best_fitness):
+                        best_generation = i
                         best_route = individuals[j]
-                # print("generation:",i," ",individuals[j])
-                # print("Fitness: ", Genetic.fitness(individuals[j]))
+            # print("generation:",i," ",individuals[j])
+            # print("Fitness: ", Cities.fitness(individuals[j]))
 
-        # print(best_route)
-        plt.figure(figsize=(8, 6))
-        x = []
-        y = []
-        for i in best_route:
-            # print(i)
-            city = Genetic.cities[i]
-            # city = list(Genetic.cities.keys())[i]
-            # print(city)
-            x.append(city[1])
-            y.append(city[0])
-            plt.text(city[1], city[0], city, fontsize=8)
-        plt.plot(x, y, '-ro')
-        plt.plot(x+[x[0]], y+[y[0]], '-ro')
-
-            # Add distance labels between cities
-        total_distance = 0
-        for i in range(len(best_route)-1):
-            # city = Genetic.cities
-
-            city1 = best_route[i]
-            city2 = best_route[i+1]
-            x1, y1 = x[i], y[i]
-            x2, y2 = x[i+1], y[i+1]
-            # print(city1, city2)
-            distance = Genetic.calculate_distance(city1, city2)
-            total_distance += distance
-            plt.text((x1+x2)/2, (y1+y2)/2, "{:.2f}".format(distance), fontsize=6)
-        city1 = best_route[len(best_route)-1]
-        city2 = best_route[0]
-        x1, y1 = x[len(best_route)-1], y[len(best_route)-1]
-        x2, y2 = x[0], y[0]
-        distance = Genetic.calculate_distance(city1,city2)
-        total_distance += distance
-        plt.text((x1+x2)/2, (y1+y2)/2, "{:.2f}".format(distance), fontsize=6)
-
-        plt.title("Optimal Route for {} Cities\nTotal Distance: {:.2f} km".format(len(Genetic.cities), total_distance))
-        plt.xlabel("Longitude")
-        plt.ylabel("Latitude")
-        plt.show()
-        print("Problem solved for Genetic.")
+    print(best_generation)
+    plot(best_route)
+    print("Problem solved for Cities.")
