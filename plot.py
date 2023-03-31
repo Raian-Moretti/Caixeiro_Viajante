@@ -1,6 +1,12 @@
 import matplotlib.pyplot as plt
 from cities import Cities
 
+def plot_progress(progress):
+    plt.ylabel('Distance')
+    plt.xlabel('Generation')
+    plt.plot(progress)
+    plt.show()
+
 def plot(best_route):
     plt.figure(figsize=(8, 6))
     x = []

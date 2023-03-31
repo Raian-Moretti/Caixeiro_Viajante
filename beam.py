@@ -1,11 +1,11 @@
 ## Menu class for Beam Search Algorithm
 import math
 import random
-from plot import plot
+from plot import plot, plot_progress
 from cities import Cities
 
 k = 5
-generations = 200
+generations = 500
 
 def generate_neighbours(individuals):
     new_individual = []
@@ -84,6 +84,8 @@ def calculate_distance(city1, city2):
 def beam_search():
     
     individuals = population(k, Cities.cities)
+    best_generation = 0
+    progress = []
     for i in range(generations):
         print("GENERATION: ", i)
         individual_with_neighbour = generate_neighbours(individuals)
@@ -92,19 +94,32 @@ def beam_search():
         #     print(best_individuals[i], Beam.fitness(best_individuals[i]))
 
         individuals = best_individuals
-    
-    for j in range(len(individuals)):
-            if(j == 0):
+
+        for j in range(len(individuals)):
+            if(i == 0):
                 best_fitness = fitness(individuals[j])
                 best_route = individuals[j]
-
+            
             else:
                 if(best_fitness < fitness(individuals[j])):
                     best_fitness = fitness(individuals[j])
-                    best_route = individuals[j]
+                    if(fitness(best_route) < best_fitness):
+                        best_generation = i
+                        best_route = individuals[j]
+        progress.append(1/best_fitness)
+
+            # else:
+            #     if(best_fitness < fitness(individuals[j])):
+            #         best_generation = i
+            #         best_fitness = fitness(individuals[j])
+            #         best_route = individuals[j]
             # print("generation:",i," ",individuals[j])
             # print("Fitness: ", Beam.fitness(individuals[j]))
 
     # print(best_route)
-    plot(best_route)
+    print(best_generation)
+    print(len(progress))
+    plot_progress(progress)
+    # plot(best_route)
     print("Problem solved for Beam.")
+    return 1/best_fitness

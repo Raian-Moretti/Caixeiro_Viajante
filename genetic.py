@@ -1,51 +1,74 @@
 import random
 import math
-from plot import plot
+from plot import plot, plot_progress
 from cities import Cities
 
-population_size = 50
-generations = 200
+population_size = 1000
+generations = 2000
 mutation_rate = 0.05
 crossover_rate = 0.8
 
 def mutation(population):
 
-    # for i in range(len(population)):
-    #     if(random.random() < Cities.mutation_rate):
-
-    #         first_mutation = math.ceil(random.random()*(len(Cities.cities)-1))
-    #         second_mutation = math.ceil(random.random()*(len(Cities.cities)-1))
-    #         population[i][first_mutation], population[i][second_mutation] = population[i][second_mutation], population[i][first_mutation]
-    # return population
-
-    new_population = []
     for i in range(len(population)):
         if(random.random() < mutation_rate):
-            new_individual = []
-            rand1 = math.ceil(random.random()*(len(Cities.cities)-1))
-            rand2 = math.ceil(random.random()*(len(Cities.cities)-1))
-            begin, end = 0, 0
-            if(rand1 < rand2):
-                begin = rand1
-                end = rand2
-            else:
-                begin = rand2
-                end = rand1
-            
-            new_individual[:begin] = population[i][:begin]
-            new_individual[begin:end] = reversed(population[i][begin:end])
-            new_individual[end:] = population[i][end:]
-            new_population.append(new_individual)
-        else:
-            new_population.append(population[i])
+            first_mutation = math.ceil(random.random()*(len(Cities.cities)-1))
+            second_mutation = math.ceil(random.random()*(len(Cities.cities)-1))
+            population[i][first_mutation], population[i][second_mutation] = population[i][second_mutation], population[i][first_mutation]
+    return population
 
-    return new_population
+    # new_population = []
+    # for i in range(len(population)):
+    #     if(random.random() < mutation_rate):
+    #         new_individual = []
+    #         rand1 = math.ceil(random.random()*(len(Cities.cities)-1))
+    #         rand2 = math.ceil(random.random()*(len(Cities.cities)-1))
+    #         begin, end = 0, 0
+    #         if(rand1 < rand2):
+    #             begin = rand1
+    #             end = rand2
+    #         else:
+    #             begin = rand2
+    #             end = rand1
+            
+    #         new_individual[:begin] = population[i][:begin]
+    #         new_individual[begin:end] = reversed(population[i][begin:end])
+    #         new_individual[end:] = population[i][end:]
+    #         new_population.append(new_individual)
+    #     else:
+    #         new_population.append(population[i])
+
+    # return new_population
 
 
 def crossover(parents):
+    # new_population = []
+    # for first_parent, second_parent in parents:
+    #     if random.random() < crossover_rate:
+    #         first_half = []
+    #         second_half = []
+    #         child = []
+    #         rand1 = math.ceil(random.random()*(len(first_parent)))
+    #         rand2 = math.ceil(random.random()*(len(first_parent)))
+
+    #         begin = min(rand1,rand2)
+    #         end = max(rand1,rand2)
+
+    #         for i in range(begin, end):
+    #             first_half.append(first_parent[i])
+            
+    #         second_half = [city for city in second_parent if city not in first_half]
+    #         child = first_half + second_half
+
+    #         new_population.append(child)
+    #     else:
+    #         if(fitness(first_parent) > fitness(second_parent)):
+    #             new_population.append(first_parent)
+    #         else:
+    #             new_population.append(second_parent)
+        
     new_population = []
     for first_parent, second_parent in parents:
-
         if random.random() < crossover_rate:
             child = []
             for i in range(int((len(first_parent))/2)):
@@ -55,7 +78,6 @@ def crossover(parents):
                     child.append(second_parent[i])
             new_population.append(child)
         else:
-
             if(fitness(first_parent) > fitness(second_parent)):
                 new_population.append(first_parent)
             else:
@@ -83,7 +105,7 @@ def selection(individuals):
         if(first_parent != second_parent):
             parents.append((first_parent,second_parent))
 
-    return parents        
+    return parents    
 
 # Sorteia os indivíduos da população aleatoriamente
 def population(population_size, cities):
@@ -112,6 +134,7 @@ def genetic_algorithm():
     best_route = []
     best_fitness = 0
     best_generation = 0
+    progress = []
     for i in range(generations):
         print("GENERATION: ", i)
 
@@ -134,9 +157,18 @@ def genetic_algorithm():
                     if(fitness(best_route) < best_fitness):
                         best_generation = i
                         best_route = individuals[j]
+        progress.append(1/best_fitness)
             # print("generation:",i," ",individuals[j])
-            # print("Fitness: ", Cities.fitness(individuals[j]))
-
+    # print(progress)
+    # best_route = individuals[0]
+    # for i in range(1,len(individuals)):
+    #     if(fitness(best_route) < fitness(individuals[i])):
+    #         best_route = individuals[i]
+    
+    # print(best_route)
     print(best_generation)
-    plot(best_route)
-    print("Problem solved for Cities.")
+    print(len(progress))
+    plot_progress(progress)
+    # plot(best_route)
+    print("Problem solved for Beam.")
+    return 1/best_fitness
