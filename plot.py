@@ -18,7 +18,7 @@ def plot(best_route):
         # print(city)
         x.append(city[1])
         y.append(city[0])
-        plt.text(city[1], city[0], city, fontsize=8)
+        # plt.text(city[1], city[0], city, fontsize=8)
     plt.plot(x, y, '-ro')
     plt.plot(x+[x[0]], y+[y[0]], '-ro')
 

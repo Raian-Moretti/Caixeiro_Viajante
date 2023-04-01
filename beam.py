@@ -5,7 +5,7 @@ from plot import plot, plot_progress
 from cities import Cities
 
 k = 5
-generations = 500
+generations = 1000
 
 def generate_neighbours(individuals):
     new_individual = []
@@ -120,6 +120,6 @@ def beam_search():
     print(best_generation)
     print(len(progress))
     plot_progress(progress)
-    # plot(best_route)
+    plot(best_route)
     print("Problem solved for Beam.")
     return 1/best_fitness

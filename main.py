@@ -4,7 +4,7 @@ from beam import beam_search
 sum=0
 itr=10
 for i in range(itr):
-    sum += genetic_algorithm()
-    # sum += beam_search()
+    # sum += genetic_algorithm()
+    sum += beam_search()
 
 print("MEAN", sum/itr)
