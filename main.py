@@ -1,10 +1,21 @@
 from PySide6.QtWidgets import QApplication
-from genetic import genetic_algorithm
-from beam import beam_search
-sum=0
-itr=10
-for i in range(itr):
-    # sum += genetic_algorithm()
-    sum += beam_search()
+from src.genetic import genetic_algorithm
+from src.beam import beam_search
 
-print("MEAN", sum/itr)
+opt = -1
+while opt != 0:
+    print("\nQual algoritmo deseja executar?\n1 - Algoritmo Genético\n2 - Algoritmo de Busca em Feixe\n0 - Sair")
+    try:
+        opt = int(input())
+    except ValueError:
+        print("\nFavor digitar um número")
+        continue
+    if(opt == 1):
+        genetic_algorithm()
+    elif(opt == 2):
+        beam_search()
+    elif(opt == 0):
+        print("\nFinalizado!")
+    else:
+        print("\nOpção inválida")
+        

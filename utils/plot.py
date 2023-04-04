@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from cities import Cities
+from src.cities import Cities
 
 def plot_progress(progress):
     plt.ylabel('Distance')
